@@ -241,17 +241,19 @@ def run_yolo_detection(image_path, detection_folder, filename):
     save_path = os.path.join(detection_folder, filename)
     cv2.imwrite(save_path, img)
 
-    return f"detections/{filename}", result_text
+    return f"static/detections/{filename}", result_text
 
 import uuid
 
 @app.route('/complaint', methods=['GET', 'POST'])
 def complaint():
+
     if 'email' not in session:
         flash('Please login to file a complaint.', 'warning')
         return redirect(url_for('login'))
 
     if request.method == 'POST':
+
         title = request.form.get('title')
         description = request.form.get('description')
         complaint_image = request.files.get('complaint_image')
@@ -264,21 +266,20 @@ def complaint():
             flash('Please upload a valid image file.', 'danger')
             return redirect(request.url)
 
-        
         ext = complaint_image.filename.rsplit('.', 1)[1].lower()
         unique_name = f"{uuid.uuid4().hex}.{ext}"
 
-        upload_folder = os.path.join("static", "uploads")
-        detection_folder = os.path.join("static", "detections")
+        upload_folder = app.config['COMPLAINT_UPLOAD_FOLDER']
+
+        detection_folder = os.path.join(BASE_DIR, "static", "detections")
 
         os.makedirs(upload_folder, exist_ok=True)
         os.makedirs(detection_folder, exist_ok=True)
 
-        
         original_path = os.path.join(upload_folder, unique_name)
+
         complaint_image.save(original_path)
 
-        # Run detection
         detected_relative_path, result_text = run_yolo_detection(
             original_path,
             detection_folder,
@@ -289,8 +290,8 @@ def complaint():
             flash("Error processing image.", "danger")
             return redirect(request.url)
 
-        # Save to database
         conn = get_db_connection()
+
         conn.execute("""
             INSERT INTO complients
             (title, description, image_path, result, user_email)
@@ -302,10 +303,12 @@ def complaint():
             result_text,
             session['email']
         ))
+
         conn.commit()
         conn.close()
 
         flash('Complaint filed & analyzed successfully.', 'success')
+
         return redirect(url_for('my_complaints'))
 
     return render_template('complaint.html', title="File Complaint")
@@ -622,6 +625,7 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
+
     init_db()
 
     port = int(os.environ.get("PORT", 8080))
