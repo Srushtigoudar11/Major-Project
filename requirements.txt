@@ -1,17 +1,20 @@
 flask
+flask-socketio
+eventlet
 gunicorn
 
-ultralytics>=8.2.34
-
-opencv-python-headless
 numpy
 pillow
+opencv-python-headless
 
 torch==2.3.1+cpu
 torchvision==0.18.1+cpu
---extra-index-url https://download.pytorch.org/whl/cpu
+
+ultralytics==8.2.0
 
 PyYAML
 requests
 tqdm
 psutil
+
+--extra-index-url https://download.pytorch.org/whl/cpu
