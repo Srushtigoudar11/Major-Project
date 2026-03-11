@@ -222,8 +222,8 @@ def get_model():
     return model
 
 def run_yolo_detection(image_path, detection_folder, filename):
-    import cv2
-    import os
+    if cv2 is None:
+        return None, "OpenCV not available"
 
     img = cv2.imread(image_path)
     if img is None:
