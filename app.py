@@ -7,7 +7,9 @@ import torch
 from datetime import datetime
 import yaml
 import smtplib
+import numpy as np
 
+from PIL import Image
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -213,53 +215,57 @@ def get_model():
         model = torch.hub.load(
             "ultralytics/yolov5",
             "custom",
-            path=model_path
-        )
+            path=model_path,
+            force_reload=False,
+            trust_repo=True
+            )
 
         model.conf = 0.15
         model.iou = 0.45
 
     return model
 
+from PIL import Image
+import numpy as np
+
 def run_yolo_detection(image_path, detection_folder, filename):
 
-    if cv2 is None:
-        return None, "OpenCV not available"
-
-    img = cv2.imread(image_path)
-
-    if img is None:
-        return None, "Image not readable"
-
-    model = get_model()
-
-    if model is None:
-        return None, "Model load failed"
-
     try:
-        results = model(img)
+        # Load image using Pillow instead of cv2
+        img = Image.open(image_path).convert("RGB")
+        img_np = np.array(img)
+
+        model = get_model()
+
+        if model is None:
+            print("Model load failed")
+            return None, "Model load failed"
+
+        results = model(img_np)
+
+        detected_classes = []
+
+        for *box, conf, cls in results.xyxy[0]:
+            class_name = model.names[int(cls)]
+            detected_classes.append(class_name)
+
+        detected_classes = list(set(detected_classes))
+
+        if not detected_classes:
+            result_text = "No object detected"
+        else:
+            result_text = ", ".join(detected_classes)
+
+        save_path = os.path.join(detection_folder, filename)
+
+        # Save result image
+        img.save(save_path)
+
+        return f"detections/{filename}", result_text
+
     except Exception as e:
-        print("YOLO error:", e)
+        print("Detection error:", e)
         return None, "Detection failed"
-
-    detected_classes = []
-
-    for *box, conf, cls in results.xyxy[0]:
-        class_name = model.names[int(cls)]
-        detected_classes.append(class_name)
-
-    detected_classes = list(set(detected_classes))
-
-    if not detected_classes:
-        result_text = "No object detected"
-    else:
-        result_text = ", ".join(detected_classes)
-
-    save_path = os.path.join(detection_folder, filename)
-
-    cv2.imwrite(save_path, img)
-
-    return f"detections/{filename}", result_text
 
 import uuid
 
