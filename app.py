@@ -7,7 +7,6 @@ import torch
 from datetime import datetime
 import yaml
 import smtplib
-import cv2
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,6 +14,11 @@ from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO, emit, join_room
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+try:
+    import cv2
+except:
+    cv2 = None
 
 app = Flask(__name__)
 app.secret_key = 'wverihdfuvuwi2482'
@@ -196,35 +200,24 @@ def profile():
 # Load model once
 model = None
 
-model = None
-
 def get_model():
     global model
 
     if model is None:
-
         model_path = os.path.join(BASE_DIR, "best.pt")
 
         if not os.path.exists(model_path):
-            print("ERROR: best.pt not found")
+            print("best.pt not found")
             return None
 
-        try:
-            model = torch.hub.load(
-                "ultralytics/yolov5",
-                "custom",
-                path=model_path,
-                force_reload=False
-            )
+        model = torch.hub.load(
+            "ultralytics/yolov5",
+            "custom",
+            path=model_path
+        )
 
-            model.conf = 0.15
-            model.iou = 0.45
-
-            print("YOLO model loaded successfully")
-
-        except Exception as e:
-            print("Model loading error:", e)
-            return None
+        model.conf = 0.15
+        model.iou = 0.45
 
     return model
 
@@ -238,7 +231,7 @@ def run_yolo_detection(image_path, detection_folder, filename):
     
     model = get_model()
     if model is None:
-        return None, "Model failed to load"
+        return None, "Model load failed"
     results = model(img)
 
    
@@ -258,7 +251,7 @@ def run_yolo_detection(image_path, detection_folder, filename):
         result_text = ", ".join(detected_classes)
 
     # Draw boxes
-    results.render()
+
 
     save_path = os.path.join(detection_folder, filename)
     cv2.imwrite(save_path, img)
