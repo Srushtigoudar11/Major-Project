@@ -222,41 +222,44 @@ def get_model():
     return model
 
 def run_yolo_detection(image_path, detection_folder, filename):
+
     if cv2 is None:
         return None, "OpenCV not available"
 
     img = cv2.imread(image_path)
+
     if img is None:
         return None, "Image not readable"
-    
+
     model = get_model()
+
     if model is None:
         return None, "Model load failed"
-    results = model(img)
 
-   
+    try:
+        results = model(img)
+    except Exception as e:
+        print("YOLO error:", e)
+        return None, "Detection failed"
+
     detected_classes = []
 
     for *box, conf, cls in results.xyxy[0]:
         class_name = model.names[int(cls)]
         detected_classes.append(class_name)
 
-   
     detected_classes = list(set(detected_classes))
 
-   
     if not detected_classes:
         result_text = "No object detected"
     else:
         result_text = ", ".join(detected_classes)
 
-    # Draw boxes
-
-
     save_path = os.path.join(detection_folder, filename)
+
     cv2.imwrite(save_path, img)
 
-    return f"static/detections/{filename}", result_text
+    return f"detections/{filename}", result_text
 
 import uuid
 
