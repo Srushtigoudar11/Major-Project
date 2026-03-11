@@ -208,7 +208,7 @@ def get_model():
     global model
 
     if model is None:
-        model_path = os.path.join(BASE_DIR, "models", "best.pt")
+        model_path = os.path.join(BASE_DIR, "best.pt")
 
         if not os.path.exists(model_path):
             print("best.pt not found")
