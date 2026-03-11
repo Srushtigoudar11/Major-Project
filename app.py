@@ -7,6 +7,7 @@ import torch
 from datetime import datetime
 import yaml
 import smtplib
+import cv2
 
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -195,17 +196,36 @@ def profile():
 # Load model once
 model = None
 
+model = None
+
 def get_model():
     global model
+
     if model is None:
-        model = torch.hub.load(
-            'ultralytics/yolov5:v6.2',
-            'custom',
-            path=os.path.join(BASE_DIR, "best.pt"),
-            source='github'
-        )
-        model.conf = 0.15
-        model.iou = 0.45
+
+        model_path = os.path.join(BASE_DIR, "best.pt")
+
+        if not os.path.exists(model_path):
+            print("ERROR: best.pt not found")
+            return None
+
+        try:
+            model = torch.hub.load(
+                "ultralytics/yolov5",
+                "custom",
+                path=model_path,
+                force_reload=False
+            )
+
+            model.conf = 0.15
+            model.iou = 0.45
+
+            print("YOLO model loaded successfully")
+
+        except Exception as e:
+            print("Model loading error:", e)
+            return None
+
     return model
 
 def run_yolo_detection(image_path, detection_folder, filename):
@@ -215,8 +235,10 @@ def run_yolo_detection(image_path, detection_folder, filename):
     img = cv2.imread(image_path)
     if img is None:
         return None, "Image not readable"
-
+    
     model = get_model()
+    if model is None:
+        return None, "Model failed to load"
     results = model(img)
 
    
