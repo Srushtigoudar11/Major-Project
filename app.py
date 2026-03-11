@@ -202,11 +202,13 @@ def profile():
 # Load model once
 model = None
 
+model = None
+
 def get_model():
     global model
 
     if model is None:
-        model_path = os.path.join(BASE_DIR, "best.pt")
+        model_path = os.path.join(BASE_DIR, "models", "best.pt")
 
         if not os.path.exists(model_path):
             print("best.pt not found")
@@ -216,9 +218,8 @@ def get_model():
             "ultralytics/yolov5",
             "custom",
             path=model_path,
-            force_reload=False,
-            trust_repo=True
-            )
+            source="github"
+        )
 
         model.conf = 0.15
         model.iou = 0.45
