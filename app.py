@@ -201,7 +201,7 @@ def get_model():
         model = torch.hub.load(
             'ultralytics/yolov5:v6.2',
             'custom',
-            path='best.pt',
+            path=os.path.join(BASE_DIR, "best.pt"),
             source='github'
         )
         model.conf = 0.15
