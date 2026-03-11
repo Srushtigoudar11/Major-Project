@@ -18,6 +18,9 @@ from email.mime.multipart import MIMEMultipart
 app = Flask(__name__)
 app.secret_key = 'wverihdfuvuwi2482'
 
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False
+
 EMAIL_ADDRESS = "c9074hai@gmail.com"
 EMAIL_PASSWORD = "dnhd qnaf dklq jshy"  
 ADMIN_EMAIL = "deeplearning251@gmail.com"
@@ -34,6 +37,9 @@ app.config['COMPLAINT_UPLOAD_FOLDER'] = os.path.join(
 app.config['PROFILE_UPLOAD_FOLDER'] = os.path.join(
     BASE_DIR, 'static', 'profiles'
 )
+
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 
 os.makedirs(app.config['COMPLAINT_UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['PROFILE_UPLOAD_FOLDER'], exist_ok=True)
