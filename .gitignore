@@ -49,7 +49,7 @@ VOC/
 
 # Neural Network weights -----------------------------------------------------------------------------------------------
 *.weights
-*!.pt
+*.pt
 *.pb
 *.onnx
 *.engine
@@ -64,6 +64,7 @@ VOC/
 *_paddle_model/
 darknet53.conv.74
 yolov3-tiny.conv.15
+!best.pt
 
 # GitHub Python GitIgnore ----------------------------------------------------------------------------------------------
 # Byte-compiled / optimized / DLL files
