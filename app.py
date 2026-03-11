@@ -187,16 +187,20 @@ def profile():
 
 
 # Load model once
-model = torch.hub.load(
-    'ultralytics/yolov5:v6.2',
-    'custom',
-    path='best.pt',
-    source='github'
-)
+model = None
 
-
-model.conf = 0.15
-model.iou = 0.45
+def get_model():
+    global model
+    if model is None:
+        model = torch.hub.load(
+            'ultralytics/yolov5:v6.2',
+            'custom',
+            path='best.pt',
+            source='github'
+        )
+        model.conf = 0.15
+        model.iou = 0.45
+    return model
 
 def run_yolo_detection(image_path, detection_folder, filename):
     import cv2
@@ -206,6 +210,7 @@ def run_yolo_detection(image_path, detection_folder, filename):
     if img is None:
         return None, "Image not readable"
 
+    model = get_model()
     results = model(img)
 
    
@@ -613,10 +618,13 @@ def logout():
 if __name__ == '__main__':
     init_db()
 
-    socketio.run(
-        app,
-        host="0.0.0.0",
-        port=5000,
-        debug=True,
-        use_reloader=False
-    )
+    if __name__ == '__main__':
+        init_db()
+        
+        port = int(os.environ.get("PORT", 5000))
+        
+        socketio.run(
+            app,
+            host="0.0.0.0",
+            port=port
+            )
