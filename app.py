@@ -26,11 +26,11 @@ app = Flask(__name__)
 app = Flask(__name__)
 
 # Allow larger uploads (important for mobile photos)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 app.secret_key = 'wverihdfuvuwi2482'
 
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
 
 EMAIL_ADDRESS = "c9074hai@gmail.com"
 EMAIL_PASSWORD = "dnhd qnaf dklq jshy"  
