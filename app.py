@@ -202,17 +202,21 @@ def profile():
 # Load model once
 model = None
 
-model = None
-
 def get_model():
     global model
 
     if model is None:
-        model_path = os.path.join(BASE_DIR, "best.pt")
+
+        model_path = os.path.join(os.getcwd(), "best.pt")
+
+        print("Current directory:", os.getcwd())
+        print("Looking for model at:", model_path)
 
         if not os.path.exists(model_path):
             print("best.pt not found")
             return None
+
+        print("Loading YOLO model...")
 
         model = torch.hub.load(
             "ultralytics/yolov5",
