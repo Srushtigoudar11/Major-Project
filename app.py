@@ -23,6 +23,10 @@ except:
     cv2 = None
 
 app = Flask(__name__)
+app = Flask(__name__)
+
+# Allow larger uploads (important for mobile photos)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.secret_key = 'wverihdfuvuwi2482'
 
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -264,9 +268,9 @@ def run_yolo_detection(image_path, detection_folder, filename):
         save_path = os.path.join(detection_folder, filename)
 
         # Save result image
-        img.save(save_path)
+        img.save(save_path, format="JPEG")
 
-        return f"detections/{filename}", result_text
+        return f"/static/detections/{filename}", result_text
 
     except Exception as e:
         print("Detection error:", e)
@@ -314,10 +318,10 @@ def complaint():
             detection_folder,
             unique_name
         )
-
         if detected_relative_path is None:
-            flash("Error processing image.", "danger")
-            return redirect(request.url)
+            print("Image detection failed, saving original image only")
+            detected_relative_path = f"uploads/complaints/{unique_name}"
+            result_text = "Detection failed"
 
         conn = get_db_connection()
 
@@ -566,14 +570,13 @@ def user_chat():
     )
 
 
-
-
 socketio = SocketIO(
     app,
     cors_allowed_origins="*",
     async_mode="threading"
 )
 
+init_db()
 
 # Admin Chat Route
 @app.route('/admin/chat/<user_email>')
