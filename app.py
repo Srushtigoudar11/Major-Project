@@ -654,6 +654,7 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
+    app.run()
 
     init_db()
 
