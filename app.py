@@ -653,15 +653,6 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-socketio = SocketIO(
-    app,
-    cors_allowed_origins="*",
-    async_mode="threading"
-)
-
-init_db()
-
 if __name__ == "__main__":
     init_db()
-
-
+    app.run(host="0.0.0.0", port=8080)
